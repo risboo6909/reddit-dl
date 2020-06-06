@@ -41,7 +41,7 @@ fn main() -> Result<()> {
                 .short("d")
                 .long("dir")
                 .value_name("DIR")
-                .help("Directory to save downloaded images (default is $HOME/Pictures/memes)")
+                .help("Directory to save downloaded images (default is $HOME/Pictures/reddit)")
                 .takes_value(true),
         )
         .get_matches();
