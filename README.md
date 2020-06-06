@@ -1,5 +1,5 @@
 # reddit-dl
-Reddit images downloader in Rust
+Reddit images downloader written in Rust
 
 Inspired by https://github.com/darkmtr/reddit-downloader
 
@@ -15,7 +15,7 @@ FLAGS:
     -V, --version    Prints version information
 
 OPTIONS:
-    -d, --dir <DIR>                    Directory to save downloaded images (default is $HOME/Pictures/memes)
+    -d, --dir <DIR>                    Directory to save downloaded images (default is $HOME/Pictures/reddit)
     -l, --limit <LIMIT>                Max number of images to download (defaults to 50)
     -m, --max_connections <MAXCONN>    Maximum number of simultaneous downloads (defaults to 10)
 
