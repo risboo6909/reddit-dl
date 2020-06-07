@@ -18,7 +18,7 @@ pub(crate) struct Preview {
 #[derive(Serialize, Deserialize, Debug)]
 pub(crate) struct PostData {
     pub(crate) title: String,
-    pub(crate) preview: Preview,
+    pub(crate) preview: Option<Preview>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]

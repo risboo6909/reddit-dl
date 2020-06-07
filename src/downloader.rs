@@ -121,8 +121,10 @@ impl Downloader {
         let mut result = Vec::new();
 
         for post in resp.data.children {
-            let tmp = post.data.preview.images[0].source.url.clone();
-            result.push(tmp.replace("amp;", "").parse::<Uri>()?);
+            if let Some(preview) = post.data.preview {
+                let tmp = preview.images[0].source.url.clone();
+                result.push(tmp.replace("amp;", "").parse::<Uri>()?);
+            }
         }
 
         Ok(result)
