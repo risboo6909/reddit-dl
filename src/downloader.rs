@@ -15,7 +15,7 @@ use crate::{types, Result};
 use futures::TryFutureExt;
 
 const ENDPOINT: &str = "https://www.reddit.com/r/";
-const DL_LIMIT: usize = 50;
+const DL_LIMIT: usize = 100;
 const MAX_CONN: usize = 10;
 
 pub(crate) struct Downloader {
@@ -26,10 +26,10 @@ pub(crate) struct Downloader {
     pub(crate) max_conn: usize,
 }
 
-fn extract_filename(url: &str) -> Result<String> {
+fn extract_filename(img_idx: usize, url: &str) -> Result<String> {
     let tmp = &Url::parse(&url)?;
     let res = &tmp.path();
-    Ok(res[1..res.len()].to_owned())
+    Ok(format!("{}_{}", img_idx, res[1..res.len()].to_owned()))
 }
 
 impl Downloader {
@@ -66,14 +66,18 @@ impl Downloader {
         Ok(buf)
     }
 
-    async fn get_downloader(&self, url: Uri) -> Result<(String, bytes::BytesMut)> {
+    async fn get_downloader(
+        &self,
+        idx: usize,
+        url: Uri,
+    ) -> Result<(usize, String, bytes::BytesMut)> {
         let https = HttpsConnector::new();
         let client = Client::builder().build::<_, hyper::Body>(https);
 
         // receive file blocks async
         let content = self.recv(client.get(url.clone())).await?;
 
-        Ok((url.to_string(), content))
+        Ok((idx, url.to_string(), content))
     }
 
     pub(crate) async fn download_urls(&self, urls: &[Uri]) -> Result<()> {
@@ -87,25 +91,32 @@ impl Downloader {
 
         progress_bar.set_message("downloading images");
 
+        let mut img_idx = 0usize;
+
         while !urls_to_download.is_empty() {
             let mut clients_vec = Vec::with_capacity(self.max_conn);
 
             for _ in 0..min(self.max_conn, urls_to_download.len()) {
-                let client = self.get_downloader(urls_to_download.pop().unwrap());
+                let client = self.get_downloader(img_idx, urls_to_download.remove(0));
 
-                clients_vec.push(client.and_then(|(url, res)| async {
-                    let file_name = extract_filename(&url)?;
+                clients_vec.push(client.and_then(|(img_idx, url, res)| {
+                    let progress_bar = &progress_bar;
+                    async move {
+                        let file_name = extract_filename(img_idx, &url)?;
 
-                    // save on disk
-                    create_dir_all(&self.save_path).await?;
+                        // save on disk
+                        create_dir_all(&self.save_path).await?;
 
-                    let save_path = self.save_path.join(&file_name);
-                    let mut file = File::create(save_path).await?;
-                    file.write_all(&res).await?;
+                        let save_path = self.save_path.join(&file_name);
+                        let mut file = File::create(save_path).await?;
+                        file.write_all(&res).await?;
 
-                    progress_bar.inc(1);
-                    Ok((url, res))
+                        progress_bar.inc(1);
+                        Ok(())
+                    }
                 }));
+
+                img_idx += 1;
             }
 
             // wait all clients to finish
@@ -132,7 +143,7 @@ impl Downloader {
 
     pub(crate) async fn download_page(&self) -> Result<Vec<Uri>> {
         println!("downloading page... ");
-        let (_, content) = self.get_downloader(self.url.clone()).await?;
+        let (_, _, content) = self.get_downloader(0, self.url.clone()).await?;
         let urls = self.parse_subr(serde_json::from_slice::<types::Resp>(&content)?)?;
         Ok(urls)
     }

@@ -25,7 +25,7 @@ fn main() -> Result<()> {
                 .short("l")
                 .long("limit")
                 .value_name("LIMIT")
-                .help("Max number of images to download (defaults to 50)")
+                .help("Max number of images to download (defaults to 100)")
                 .takes_value(true),
         )
         .arg(

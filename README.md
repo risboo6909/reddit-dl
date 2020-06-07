@@ -22,3 +22,13 @@ OPTIONS:
 ARGS:
     <subreddit>    subreddit name
 </pre>
+
+## Examples
+
+Download 100 images from subreddit **memes** into $HOME/Pictures/reddit/memes directory:
+
+`./reddit-dl memes`
+
+Download 50 images from subreddit **memes** into ./dankmemes directory:
+
+`./reddit-dl dankmemes -l 50 -d darkmemes`
