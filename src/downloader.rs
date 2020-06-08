@@ -48,7 +48,10 @@ impl Downloader {
                 .unwrap_or_else(|_| panic!("failed to parse URL: {}", full_url)),
 
             save_path: save_path
-                .unwrap_or_else(|| dirs::picture_dir().unwrap().join("reddit").join(subr)),
+                .unwrap_or_else(||
+                    dirs::picture_dir().unwrap_or_else(|| panic!("unable to determine default pictures directory, please specify one using -d option"))
+                        .join("reddit").join(subr)
+                ),
             limit,
             max_conn: max_conn.unwrap_or(MAX_CONN),
         }
