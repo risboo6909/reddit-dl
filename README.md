@@ -31,4 +31,4 @@ Download 100 images from subreddit **memes** into $HOME/Pictures/reddit/memes di
 
 Download 50 images from subreddit **dankmemes** into ./dankmemes directory:
 
-`./reddit-dl dankmemes -l 50 -d darkmemes`
+`./reddit-dl dankmemes -l 50 -d dankmemes`
